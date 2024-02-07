@@ -5,6 +5,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.4"
 	kotlin("jvm") version "1.9.22"
 	kotlin("plugin.spring") version "1.9.22"
+	id("org.flywaydb.flyway") version "8.0.1"
 }
 
 group = "com.example"
@@ -23,8 +24,17 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	runtimeOnly("org.postgresql:postgresql")
+	implementation("mysql:mysql-connector-java:8.0.12")
+	implementation("org.flywaydb:flyway-core")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+	implementation("org.flywaydb:flyway-mysql")
+}
+
+flyway {
+	url = "jdbc:mysql://127.0.0.1:3306/sample-db?characterEncoding=utf8"
+	user = "sample-user"
+	password = "sample-pass"
 }
 
 tasks.withType<KotlinCompile> {
