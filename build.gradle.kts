@@ -6,6 +6,7 @@ plugins {
 	kotlin("jvm") version "1.9.22"
 	kotlin("plugin.spring") version "1.9.22"
 	id("org.flywaydb.flyway") version "8.0.1"
+	id("nu.studer.jooq") version "7.1.1"
 }
 
 group = "com.example"
@@ -24,11 +25,13 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	implementation("mysql:mysql-connector-java:8.0.12")
 	implementation("org.flywaydb:flyway-core")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-
 	implementation("org.flywaydb:flyway-mysql")
+
+	runtimeOnly("com.mysql:mysql-connector-j")
+	jooqGenerator("com.mysql:mysql-connector-j")
+	jooqGenerator("jakarta.xml.bind:jakarta.xml.bind-api:3.0.1")
 }
 
 flyway {
@@ -46,4 +49,34 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+jooq {
+	configurations {
+		create("main") {
+			jooqConfiguration.apply {
+				jdbc.apply {
+					url = "jdbc:mysql://127.0.0.1:3306/sample-db?characterEncoding=utf8"
+					user = "sample-user"
+					password = "sample-pass"
+				}
+				generator.apply {
+					name = "org.jooq.codegen.KotlinGenerator"
+					database.apply {
+						name = "org.jooq.meta.mysql.MySQLDatabase"
+						inputSchema = "sample-db"
+						excludes = "flyway_schema_history"
+					}
+					generate.apply {
+						isDeprecated = false
+						isTables = true
+					}
+					target.apply {
+						packageName = "com.example.ktknowledgeTodo.infra.jooq"
+						directory = "${buildDir}/generated/source/jooq/main"
+					}
+				}
+			}
+		}
+	}
 }
